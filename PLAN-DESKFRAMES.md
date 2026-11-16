@@ -225,3 +225,5 @@ Online-Bilder, Hintergrundbild bleibt unangetastet, Bilddateien werden nie verä
 
 - Leichter Schatten oder abgerundete Ecken als weitere Stile
 - Rahmen sperren (gegen versehentliches Verschieben)
+- Reihenfolge im Verwaltungsfenster ändern, um die Überlappung zu steuern (welcher Rahmen oben liegt) –
+  Wunsch vom 16.11.2026
