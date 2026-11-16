@@ -214,6 +214,42 @@ public class FrameGeometryTests
         Assert.Equal(400 + 12, r.Width);
     }
 
+    // ---------- Rahmenbreite ändern ----------
+
+    [Theory]
+    [InlineData(6, 20)]
+    [InlineData(6, 0)]
+    [InlineData(0, 40)]
+    [InlineData(6, 6)]
+    public void ChangeBorder_ImageStaysSameSizeAndPlace(double oldBorder, double newBorder)
+    {
+        var start = new PixelRect(1000, 500, (int)(300 + 2 * oldBorder), (int)(200 + 2 * oldBorder));
+        var r = FrameGeometry.ChangeBorder(start, oldBorder, newBorder, 1.5);
+
+        // Bildfläche gleich groß …
+        Assert.Equal(300, r.Width - 2 * newBorder, 0);
+        Assert.Equal(200, r.Height - 2 * newBorder, 0);
+        // … und am selben Ort: linke obere Bildecke unverändert
+        Assert.Equal(start.Left + oldBorder, r.Left + newBorder, 0);
+        Assert.Equal(start.Top + oldBorder, r.Top + newBorder, 0);
+    }
+
+    [Fact]
+    public void ChangeBorder_Back_GivesStartAgain()
+    {
+        var r = FrameGeometry.ChangeBorder(Start, Border, 17, Aspect);
+        Assert.Equal(Start, FrameGeometry.ChangeBorder(r, 17, Border, Aspect));
+    }
+
+    [Fact]
+    public void ChangeBorder_FractionalScale_StaysConsistentWithOuterSize()
+    {
+        // 125 %: 6 → 7,5 px, 10 → 12,5 px
+        var start = new PixelRect(0, 0, (int)Math.Round(400 + 15.0), (int)Math.Round(400 / 1.5 + 15.0));
+        var r = FrameGeometry.ChangeBorder(start, 7.5, 12.5, 1.5);
+        Assert.Equal(FrameGeometry.OuterSize(400, 1.5, 12.5), (r.Width, r.Height));
+    }
+
     [Fact]
     public void MaxInnerWidthOnMonitor_FitsBothDirections()
     {

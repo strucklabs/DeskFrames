@@ -1,6 +1,6 @@
 # Plan: DeskFrames – Bilderrahmen auf dem Desktop
 
-Stand: 16.11.2026 · Status: **abgenommen** (Fragen beantwortet, siehe „Entscheidungen“) · S0, S1, S2 abgenommen · nächster Schritt: S3
+Stand: 16.11.2026 · Status: **abgenommen** (Fragen beantwortet, siehe „Entscheidungen“) · S0–S3 abgenommen · nächster Schritt: S4
 
 Kleines Windows-Programm (C# / .NET 10 / WPF), das lokale Bilder als schlichte Rahmen auf den Desktop legt –
 hinter allen Fenstern, durchklickbar, sichtbar bei „Desktop anzeigen“. Oberfläche englisch, Doku deutsch.
@@ -138,8 +138,25 @@ Festlegungen in S2:
 - Tray vorläufig mit `Add frame…` und `Exit`; der Rest folgt in S3.
 
 ### S3 – Tray und Verwaltungsfenster
-- [ ] Alle Befehle aus „Bedienung“ funktionieren; Änderungen sind sofort sichtbar und gespeichert
-- [ ] Kontextmenü am Rahmen bei Strg+Umschalt
+- [x] Alle Befehle aus „Bedienung“ funktionieren; Änderungen sind sofort sichtbar und gespeichert
+- [x] Kontextmenü am Rahmen bei Strg+Umschalt
+
+**S3 abgenommen (16.11.2026), Handtest bestanden.** Stand 16.11.: 112 Tests grün (neu: Autostart mit eigenem Testschlüssel, Rahmenbreite ändern). Eigene Vorprüfung
+mit Testdatei: Verwaltungsfenster per zweitem Start geöffnet; Farbe, Schieberegler und `Apply to all frames`
+wirken sofort und werden gespeichert (Bild bleibt an seinem Platz, der Rahmen wächst nach außen); Kontextmenü am
+Rahmen erscheint, „Border width → 6 px“ wirkt; Aufblinken hebt den Rahmen kurz vor alle Fenster und ordnet ihn
+danach wieder ein. Nicht automatisch geprüft: Rückfrage beim Entfernen, Dateiauswahl (Bild wechseln/hinzufügen),
+Farbdialog, Tray-Menü – gehören in den Handtest.
+
+Festlegungen in S3:
+- Autostart schon in S3 (Tray + Häkchen im Fenster); er gilt nur als „an“, wenn er auf genau diese EXE zeigt –
+  ein Eintrag einer anderen Kopie wird nie stillschweigend umgebogen.
+- Beim allerersten Start (noch keine `frames.json`) öffnet sich das Verwaltungsfenster von selbst.
+- Ein zweiter Start (Doppelklick auf die EXE) öffnet das Verwaltungsfenster der laufenden Instanz.
+- Rahmenbreite ändern: Das Bild bleibt gleich groß und am selben Ort, der Rahmen wächst nach außen.
+- Aufblinken: dreimal grün, der Rahmen liegt dafür gut eine Sekunde über allen Fenstern.
+- Programmsymbol (Rahmen mit Landschaft) wird zur Laufzeit gezeichnet; die .ico-Datei für die EXE folgt in S4.
+- Rückfragen von Windows (Entfernen) zeigen ihre Schaltflächen in der Systemsprache („Ja“/„Nein“).
 
 ### S4 – Autostart, mehrere Monitore, Feinschliff
 - [ ] Autostart an/aus über Tray; nach Windows-Anmeldung erscheinen alle Rahmen an derselben Stelle

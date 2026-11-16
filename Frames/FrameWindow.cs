@@ -49,6 +49,18 @@ internal sealed class FrameWindow : Window
     /// <summary>Position, Größe oder Seitenverhältnis wurden geändert – speichern.</summary>
     public event Action<FrameWindow>? Changed;
 
+    /// <summary>Bild geladen oder nicht gefunden – Anzeige in der Verwaltung aktualisieren.</summary>
+    public event Action<FrameWindow>? ImageStatusChanged;
+
+    /// <summary>Rechtsklick bei gedrückter Strg+Umschalt.</summary>
+    public event Action<FrameWindow>? ContextMenuRequested;
+
+    /// <summary>Blinkt gerade (liegt dafür kurz über allen Fenstern).</summary>
+    public bool IsBlinking { get; private set; }
+
+    /// <summary>Aufblinken beendet – Rahmen wieder in die Desktop-Ebene einordnen.</summary>
+    public event Action<FrameWindow>? BlinkEnded;
+
     public ImageStatus ImageStatus => _loaded?.Status ?? ImageStatus.NoPath;
 
     public FrameWindow(FrameConfig config, Func<IReadOnlyList<MonitorInfo>> monitors)
@@ -108,6 +120,12 @@ internal sealed class FrameWindow : Window
         };
         MouseMove += OnMouseMove;
         MouseLeftButtonDown += OnMouseDown;
+        MouseRightButtonUp += (_, e) =>
+        {
+            if (!_dragMode) return;
+            e.Handled = true;
+            ContextMenuRequested?.Invoke(this);
+        };
         _resizeTimer = new System.Windows.Threading.DispatcherTimer(System.Windows.Threading.DispatcherPriority.Render)
         {
             Interval = TimeSpan.FromMilliseconds(10),
@@ -219,8 +237,79 @@ internal sealed class FrameWindow : Window
         long ex = (long)Win32.GetWindowLongPtr(Hwnd, Win32.GWL_EXSTYLE);
         ex = on ? ex & ~(long)Win32.WS_EX_TRANSPARENT : ex | Win32.WS_EX_TRANSPARENT;
         Win32.SetWindowLongPtr(Hwnd, Win32.GWL_EXSTYLE, (IntPtr)ex);
-        _marker.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
+        if (!IsBlinking) _marker.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
         if (!on) Cursor = null;
+    }
+
+    // ---------- Stil ----------
+
+    /// <summary>
+    /// Neue Rahmenfarbe/-breite. Das Bild bleibt gleich groß und am selben Ort; der Rahmen wächst nach außen.
+    /// </summary>
+    public void SetBorder(string color, int width)
+    {
+        if (!FrameConfig.IsValidColor(color)) return;
+        width = Math.Clamp(width, 0, FrameConfig.MaxBorderWidth);
+        color = color.ToUpperInvariant();
+        if (color == Config.BorderColor && width == Config.BorderWidth) return;
+
+        int oldWidth = Config.BorderWidth;
+        Config.BorderColor = color;
+        Config.BorderWidth = width;
+        ApplyStyle();
+        if (Hwnd == IntPtr.Zero || width == oldWidth)
+        {
+            if (width != oldWidth) ApplySizeDip();
+            Changed?.Invoke(this);
+            return;
+        }
+
+        double scale = CurrentScale;
+        var r = FrameGeometry.ChangeBorder(GetBounds(), oldWidth * scale, width * scale, Config.AspectRatio);
+        SetBounds(KeepOnMonitor(r));
+        CommitPosition(sizeChanged: false);
+    }
+
+    /// <summary>Rechteck vollständig auf den Monitor schieben, auf dem sein Mittelpunkt liegt.</summary>
+    private PixelRect KeepOnMonitor(PixelRect r)
+    {
+        var monitors = _monitors();
+        var (name, _, _) = Placement.ToStored(r.Left, r.Top, r.Width, r.Height, monitors);
+        var b = Placement.ResolveMonitor(name, monitors).Bounds;
+        return r with
+        {
+            Left = Math.Clamp(r.Left, b.Left, Math.Max(b.Left, b.Right - r.Width)),
+            Top = Math.Clamp(r.Top, b.Top, Math.Max(b.Top, b.Bottom - r.Height)),
+        };
+    }
+
+    // ---------- Aufblinken ----------
+
+    /// <summary>
+    /// Kurzes Aufblinken (dreimal), damit man den Rahmen findet. Der Rahmen liegt dafür gut eine Sekunde über allen
+    /// Fenstern; danach ordnet ihn die Desktop-Ebene wieder ein (<see cref="BlinkEnded"/>).
+    /// </summary>
+    public void Blink()
+    {
+        if (Hwnd == IntPtr.Zero || IsBlinking) return;
+        IsBlinking = true;
+        PlaceAfter(Win32.HWND_TOP);
+        int ticks = 0;
+        var timer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(220) };
+        _marker.StrokeThickness = 4;
+        _marker.Visibility = Visibility.Visible;
+        timer.Tick += (_, _) =>
+        {
+            ticks++;
+            _marker.Visibility = ticks % 2 == 0 ? Visibility.Visible : Visibility.Collapsed;
+            if (ticks < 6) return;
+            timer.Stop();
+            _marker.StrokeThickness = 2;
+            _marker.Visibility = _dragMode ? Visibility.Visible : Visibility.Collapsed;
+            IsBlinking = false;
+            BlinkEnded?.Invoke(this);
+        };
+        timer.Start();
     }
 
     private static Cursor CursorFor(Grip grip) => grip switch
@@ -338,6 +427,7 @@ internal sealed class FrameWindow : Window
             _placeholderFile.Text = string.IsNullOrEmpty(path) ? "" : System.IO.Path.GetFileName(path);
             _placeholder.Visibility = Visibility.Visible;
         }
+        ImageStatusChanged?.Invoke(this);
     }
 
     private void AdoptAspect(double aspect)
@@ -353,16 +443,8 @@ internal sealed class FrameWindow : Window
         double max = Math.Min(FrameConfig.MaxWidthFor(aspect) * scale, FrameGeometry.MaxInnerWidthOnMonitor(monitor.Bounds, aspect, border));
         var r = FrameGeometry.ChangeAspect(start, border, aspect, min, max);
 
-        // Vollständig auf dem Monitor halten
-        var b = monitor.Bounds;
-        r = r with
-        {
-            Left = Math.Clamp(r.Left, b.Left, Math.Max(b.Left, b.Right - r.Width)),
-            Top = Math.Clamp(r.Top, b.Top, Math.Max(b.Top, b.Bottom - r.Height)),
-        };
-
         Config.AspectRatio = aspect;
-        SetBounds(r);
+        SetBounds(KeepOnMonitor(r));
         CommitPosition(sizeChanged: true);
     }
 

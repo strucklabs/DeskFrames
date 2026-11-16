@@ -101,6 +101,18 @@ public static class FrameGeometry
         return new PixelRect((int)Math.Round(cx - outerW / 2.0), (int)Math.Round(cy - outerH / 2.0), outerW, outerH);
     }
 
+    /// <summary>
+    /// Andere Rahmenbreite: Das Bild bleibt gleich groß und am selben Ort, der Rahmen wächst nach außen
+    /// (bzw. schrumpft nach innen). Die Außenmaße folgen aus <see cref="OuterSize"/>, damit sie zur Anzeige passen.
+    /// </summary>
+    public static PixelRect ChangeBorder(PixelRect outer, double oldBorder, double newBorder, double aspect)
+    {
+        double innerW = Math.Max(1, outer.Width - 2 * oldBorder);
+        var (w, h) = OuterSize(innerW, aspect, newBorder);
+        double cx = outer.Left + outer.Width / 2.0, cy = outer.Top + outer.Height / 2.0;
+        return new PixelRect((int)Math.Round(cx - w / 2.0), (int)Math.Round(cy - h / 2.0), w, h);
+    }
+
     /// <summary>Außenmaße in ganzen Pixeln für eine Bildbreite; die Höhe folgt aus dem Seitenverhältnis.</summary>
     public static (int Width, int Height) OuterSize(double innerWidth, double aspect, double border) =>
         ((int)Math.Round(innerWidth + 2 * border), (int)Math.Round(innerWidth / aspect + 2 * border));
