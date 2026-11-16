@@ -30,7 +30,10 @@ public sealed class FrameConfig
     public int X { get; set; }
     public int Y { get; set; }
 
-    /// <summary>Außenbreite inkl. Rahmen in geräteunabhängigen Einheiten (1/96 Zoll). Höhe = Breite / Seitenverhältnis.</summary>
+    /// <summary>
+    /// Bildbreite ohne Rahmen in geräteunabhängigen Einheiten (1/96 Zoll). Höhe = Breite / Seitenverhältnis.
+    /// Der Rahmen kommt außen dazu – so hat das Bild immer genau sein eigenes Seitenverhältnis.
+    /// </summary>
     public double Width { get; set; } = DefaultWidth;
 
     /// <summary>Farbe als #RRGGBB.</summary>

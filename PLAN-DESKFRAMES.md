@@ -1,6 +1,6 @@
 # Plan: DeskFrames – Bilderrahmen auf dem Desktop
 
-Stand: 16.11.2026 · Status: **abgenommen** (Fragen beantwortet, siehe „Entscheidungen“) · S0 bestanden · nächster Schritt: S1
+Stand: 16.11.2026 · Status: **abgenommen** (Fragen beantwortet, siehe „Entscheidungen“) · S0, S1, S2 abgenommen · nächster Schritt: S3
 
 Kleines Windows-Programm (C# / .NET 10 / WPF), das lokale Bilder als schlichte Rahmen auf den Desktop legt –
 hinter allen Fenstern, durchklickbar, sichtbar bei „Desktop anzeigen“. Oberfläche englisch, Doku deutsch.
@@ -119,9 +119,23 @@ Stand 16.11.: 34 Tests grün. Tray hat vorerst nur `Exit`; Rahmen erscheinen ers
 
 ### S2 – Rahmenfenster
 Bild + Rahmenstil, Platzhalter, Verschieben und Skalieren mit fester Form, Speichern beim Loslassen.
-- [ ] Tests grün: Seitenverhältnis-Rechnung für alle 8 Griffe (Form bleibt, gegenüberliegende Ecke fest, Mindest-/Höchstgröße, Rundung ohne Drift bei vielen kleinen Schritten)
-- [ ] Tests grün: EXIF-Drehung bestimmt das Seitenverhältnis; Bild wechseln hält Fläche und Mittelpunkt
-- [ ] Fehlendes Bild zeigt den Platzhalter; Bilddatei wird nicht gesperrt (lässt sich bei laufendem Programm umbenennen)
+- [x] Tests grün: Seitenverhältnis-Rechnung für alle 8 Griffe (Form bleibt, gegenüberliegende Ecke fest, Mindest-/Höchstgröße, Rundung ohne Drift bei vielen kleinen Schritten)
+- [x] Tests grün: EXIF-Drehung bestimmt das Seitenverhältnis (inkl. Drehrichtung per Pixelprüfung); Bild wechseln hält Fläche und Mittelpunkt
+- [x] Fehlendes Bild zeigt den Platzhalter; Bilddatei wird nicht gesperrt (Test: Datei lässt sich nach dem Laden umbenennen und löschen)
+
+**S2 abgenommen (16.11.2026), Handtest bestanden.** Stand 16.11.: 100 Tests grün. Eigene Vorprüfung auf dem Testrechner mit simulierter Maus: alle 8 Griffe
+(gegenüberliegende Kante fest, Seitenverhältnis 1,60 ± Rundung, Mindestgröße 96 × 60), Verschieben auf den zweiten
+Monitor wird mit dessen Namen gespeichert, nach Neustart pixelgenau an derselben Stelle.
+
+Festlegungen in S2:
+- `Width` in `frames.json` ist die **Bildbreite ohne Rahmen** – so hat das Bild immer exakt sein Seitenverhältnis.
+- Skalieren fragt Maus und Taste per Timer ab (10 ms) statt per Mausfang: Die Rahmen werden nie aktiv, dadurch
+  ginge der Fang sofort verloren.
+- Ändert sich das Bild hinter einem Pfad (Datei ersetzt), übernimmt der Rahmen beim Start das neue
+  Seitenverhältnis (Fläche und Mitte bleiben).
+- Bilder werden nur so groß dekodiert wie nötig (mit Reserve) und nach dem Vergrößern schärfer nachgeladen.
+- Testschalter `DeskFrames.exe --config <Datei>` für Probeläufe mit eigener Rahmen-Datei.
+- Tray vorläufig mit `Add frame…` und `Exit`; der Rest folgt in S3.
 
 ### S3 – Tray und Verwaltungsfenster
 - [ ] Alle Befehle aus „Bedienung“ funktionieren; Änderungen sind sofort sichtbar und gespeichert
