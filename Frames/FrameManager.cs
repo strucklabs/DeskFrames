@@ -36,6 +36,53 @@ internal sealed class FrameManager : IDisposable
             foreach (var w in _windows) w.SetDragMode(on);
         };
         _saveTimer.Tick += (_, _) => { _saveTimer.Stop(); _config.Save(_path); };
+
+        _relayout = new Relayout(layoutAll =>
+        {
+            if (layoutAll) foreach (var w in _windows) w.PlaceFromConfig();
+            _layer?.Update();
+        });
+        // Monitor an-/abgesteckt, Auflösung oder Anordnung geändert: Rahmen aus der gespeicherten Lage neu setzen.
+        // Kommt aus einem Hintergrund-Thread und oft mehrfach – gebündelt und etwas verzögert, bis Windows fertig ist.
+        Microsoft.Win32.SystemEvents.DisplaySettingsChanged += OnDisplaySettingsChanged;
+    }
+
+    private readonly Relayout _relayout;
+
+    private void OnDisplaySettingsChanged(object? sender, EventArgs e) =>
+        _relayout.Restart(TimeSpan.FromMilliseconds(800), layoutAll: true);
+
+    /// <summary>Bündelt mehrere Anstöße zu einem Neu-Einordnen auf dem UI-Thread.</summary>
+    private sealed class Relayout
+    {
+        private readonly DispatcherTimer _timer;
+        private bool _layoutAll;
+
+        public Relayout(Action<bool> action)
+        {
+            _timer = new DispatcherTimer(DispatcherPriority.Normal, System.Windows.Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher);
+            _timer.Tick += (_, _) =>
+            {
+                _timer.Stop();
+                bool all = _layoutAll;
+                _layoutAll = false;
+                action(all);
+            };
+        }
+
+        public void Restart(TimeSpan delay, bool layoutAll)
+        {
+            // Darf aus jedem Thread kommen
+            _timer.Dispatcher.BeginInvoke(() =>
+            {
+                _layoutAll |= layoutAll;
+                _timer.Stop();
+                _timer.Interval = delay;
+                _timer.Start();
+            });
+        }
+
+        public void Stop() => _timer.Dispatcher.BeginInvoke(_timer.Stop);
     }
 
     public IReadOnlyList<FrameWindow> Windows => _windows;
@@ -67,6 +114,8 @@ internal sealed class FrameManager : IDisposable
         w.ImageStatusChanged += _ => FramesChanged?.Invoke();
         w.ContextMenuRequested += f => ContextMenuRequested?.Invoke(f);
         w.BlinkEnded += _ => _layer?.Update();
+        // Kommt bei jedem Rahmen an – ein kurzer Aufschub fasst die Meldungen zusammen
+        w.ExplorerRestarted += () => _relayout.Restart(TimeSpan.FromMilliseconds(500), layoutAll: false);
         _windows.Add(w);
         w.Show();
         _ = w.LoadImageAsync();
@@ -159,6 +208,9 @@ internal sealed class FrameManager : IDisposable
     public void Dispose()
     {
         if (_saveTimer.IsEnabled) SaveNow();
+        // Statisches Ereignis: abmelden, sonst hält Windows das Objekt fest
+        Microsoft.Win32.SystemEvents.DisplaySettingsChanged -= OnDisplaySettingsChanged;
+        _relayout.Stop();
         _modifierTimer.Stop();
         _layer?.Dispose();
         foreach (var w in _windows) w.Close();

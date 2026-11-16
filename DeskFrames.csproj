@@ -10,6 +10,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <PlatformTarget>x64</PlatformTarget>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- Erzeugt mit Assets\make-icon.ps1 -->
+    <ApplicationIcon>Assets\DeskFrames.ico</ApplicationIcon>
     <AssemblyName>DeskFrames</AssemblyName>
     <RootNamespace>DeskFrames</RootNamespace>
     <StartupObject>DeskFrames.Program</StartupObject>
@@ -30,6 +32,11 @@
     <!-- WinForms-Namespaces kollidieren mit WPF (Application, Color, Point ...) -->
     <Using Remove="System.Windows.Forms" />
     <Using Remove="System.Drawing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Dasselbe Symbol für Infobereich und Fenster -->
+    <EmbeddedResource Include="Assets\DeskFrames.ico" LogicalName="DeskFrames.ico" />
   </ItemGroup>
 
   <ItemGroup>

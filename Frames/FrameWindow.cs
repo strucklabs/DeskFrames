@@ -206,9 +206,18 @@ internal sealed class FrameWindow : Window
         _placing = false;
     }
 
+    /// <summary>Explorer wurde neu gestartet (Meldung „TaskbarCreated“ an alle Top-Level-Fenster).</summary>
+    public event Action? ExplorerRestarted;
+
+    private static readonly int TaskbarCreatedMessage = (int)Win32.RegisterWindowMessage("TaskbarCreated");
+
     private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
-        if (msg == Win32.WM_WINDOWPOSCHANGING && !_placing)
+        if (msg == TaskbarCreatedMessage && TaskbarCreatedMessage != 0)
+        {
+            ExplorerRestarted?.Invoke();
+        }
+        else if (msg == Win32.WM_WINDOWPOSCHANGING && !_placing)
         {
             // Die Z-Reihenfolge bestimmt allein die DesktopLayer – alle anderen Versuche (Klick, Verschieben) ignorieren
             var pos = Marshal.PtrToStructure<Win32.WINDOWPOS>(lParam);

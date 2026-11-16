@@ -1,6 +1,6 @@
 # Plan: DeskFrames – Bilderrahmen auf dem Desktop
 
-Stand: 16.11.2026 · Status: **abgenommen** (Fragen beantwortet, siehe „Entscheidungen“) · S0–S3 abgenommen · nächster Schritt: S4
+Stand: 16.11.2026 · Status: **abgenommen** (Fragen beantwortet, siehe „Entscheidungen“) · S0–S3 abgenommen · S4 gebaut (Handtests bewusst verzichtet), wartet auf Abnahme
 
 Kleines Windows-Programm (C# / .NET 10 / WPF), das lokale Bilder als schlichte Rahmen auf den Desktop legt –
 hinter allen Fenstern, durchklickbar, sichtbar bei „Desktop anzeigen“. Oberfläche englisch, Doku deutsch.
@@ -159,10 +159,27 @@ Festlegungen in S3:
 - Rückfragen von Windows (Entfernen) zeigen ihre Schaltflächen in der Systemsprache („Ja“/„Nein“).
 
 ### S4 – Autostart, mehrere Monitore, Feinschliff
-- [ ] Autostart an/aus über Tray; nach Windows-Anmeldung erscheinen alle Rahmen an derselben Stelle
-- [ ] Ziehen über die Monitorgrenze (unterschiedliche DPI) ohne Springen; nach Neustart am richtigen Ort
-- [ ] Explorer-Neustart, Monitor ab-/anstecken, Auflösung ändern: kein Absturz, Rahmen sichtbar
-- [ ] Programmsymbol, README.md (deutsch), Version 0.1.0
+**Verzicht (16.11.2026) auf die Handtests zu Monitoren/Skalierung, Explorer-Neustart und Autostart.**
+Die Behandlung wird trotzdem eingebaut; die drei Punkte gelten als *eingebaut, nicht von Hand geprüft*.
+
+- [ ] Autostart an/aus über Tray; nach Windows-Anmeldung erscheinen alle Rahmen an derselben Stelle – *Handtest verzichtet*
+- [ ] Ziehen über die Monitorgrenze (unterschiedliche DPI) ohne Springen; nach Neustart am richtigen Ort – *Handtest verzichtet*
+- [ ] Explorer-Neustart, Monitor ab-/anstecken, Auflösung ändern: kein Absturz, Rahmen sichtbar – *Handtest verzichtet*
+- [x] Programmsymbol, README.md (deutsch), Version 0.1.0
+
+Stand 16.11.: 112 Tests grün; EXE und Fenster tragen das neue Symbol; Start, Verwaltungsfenster per zweitem Start
+und Rahmen ohne Fehlereintrag geprüft.
+
+Eingebaut in S4 (ohne Handtest, siehe oben):
+- **Monitor an-/abgesteckt, Auflösung/Anordnung geändert** (`DisplaySettingsChanged`): alle Rahmen werden nach
+  800 ms aus der gespeicherten Lage neu gesetzt (fehlender Monitor → Hauptmonitor, gespeicherte Lage bleibt).
+- **Skalierung eines Monitors geändert / Rahmen über DPI-Grenze gezogen**: WPF skaliert das Fenster (PerMonitorV2),
+  danach wird die Lage exakt nachgesetzt; die Bildbreite ist in geräteunabhängigen Einheiten gespeichert.
+- **Explorer-Neustart** (`TaskbarCreated`): Rahmen werden nach 500 ms neu eingeordnet (zusätzlich zur
+  Sekunden-Prüfung); das Infobereich-Symbol legt Windows Forms selbst neu an.
+- **Autostart**: Eintrag unter `HKCU\…\Run` (seit S3, Tests mit eigenem Schlüssel).
+- Programmsymbol `Assets\DeskFrames.ico` (16–256 px) aus `Assets\make-icon.ps1`, eingebettet für Infobereich und
+  Fenster.
 
 ### S5 – Probelauf und Paket
 - [ ] Probelauf auf dem Testrechner mit allen Abnahmekriterien der Aufgabe (Liste unten)
@@ -174,8 +191,10 @@ Festlegungen in S3:
 2. Klicks ohne Strg+Umschalt gehen durch die Rahmen auf den Desktop (Symbole bleiben anklickbar)
 3. Mit Strg+Umschalt verschieben und an Rändern skalieren, Seitenverhältnis bleibt
 4. Nach Beenden und Neustart sowie mit Autostart nach Anmeldung: alle Rahmen an derselben Stelle mit demselben Bild
+   (Neustart geprüft; Autostart nach Anmeldung: auf den Handtest verzichtet)
 5. Fehlende Bilddatei → Platzhalter statt Fehler
 6. Mehrere Monitore mit unterschiedlicher Skalierung funktionieren
+   (zwei Monitore mit gleicher Skalierung geprüft; unterschiedliche Skalierung: auf den Handtest verzichtet)
 7. Tests für Speichern/Laden und Seitenverhältnis grün; Probelauf auf dem Testrechner bestanden
 8. Fertiges Programm als ZIP auf dem Desktop
 
