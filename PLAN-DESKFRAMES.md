@@ -30,7 +30,6 @@ Datei `%APPDATA%\DeskFrames\frames.json` (von Hand lesbar), z. B.:
 ```json
 {
   "Version": 1,
-  "Autostart": false,
   "Frames": [
     { "Id": "…", "ImagePath": "C:\\Bilder\\urlaub.jpg", "AspectRatio": 1.5,
       "Monitor": "\\\\.\\DISPLAY2", "X": 120, "Y": 80, "Width": 360,
@@ -51,6 +50,9 @@ Datei `%APPDATA%\DeskFrames\frames.json` (von Hand lesbar), z. B.:
 - Speichern atomar (temporäre Datei + Umbenennen); beschädigte/fehlende Datei → leerer Start, nie ein Absturz;
   beschädigte Datei wird als `frames.json.bad` beiseitegelegt.
 - **Autostart:** Eintrag unter `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` (keine Admin-Rechte nötig).
+  Steht nur dort, nicht zusätzlich in `frames.json` – so können beide Stellen nie widersprüchlich sein.
+- Von Hand bearbeitete Dateien: Kommentare, Komma am Ende und klein geschriebene Namen sind erlaubt; unsinnige Werte
+  (negative Größe, ungültige Farbe, Rahmenbreite > 40) werden repariert statt den Rahmen zu verwerfen.
 
 ## Bedienung
 
@@ -109,8 +111,11 @@ als Referenz in `probe/` liegen; das eigentliche Programm übernimmt daraus die 
 ### S1 – Grundgerüst, Datenmodell, Speichern/Laden
 Projekt `DeskFrames` + Testprojekt `tests/DeskFrames.Tests` (xUnit wie PerfOverlay), Fehlerprotokoll, Einzelinstanz
 (zweiter Start öffnet das Verwaltungsfenster der laufenden Instanz).
-- [ ] Tests grün: Speichern → Laden ergibt dieselben Rahmen; fehlende/leere/beschädigte Datei → leere Liste ohne Ausnahme; unbekannte Felder werden ignoriert; atomares Schreiben
-- [ ] Tests grün: Monitor-Rückfall (fehlender Monitor → Hauptmonitor, vollständig sichtbar)
+- [x] Tests grün: Speichern → Laden ergibt dieselben Rahmen; fehlende/leere/beschädigte/gesperrte Datei → leere Liste ohne Ausnahme (beschädigte als `.bad` gesichert); unbekannte Felder werden ignoriert; atomares Schreiben
+- [x] Tests grün: Monitor-Rückfall (fehlender Monitor → Hauptmonitor, vollständig sichtbar), Rückrechnung absolute Lage ↔ gespeicherte Lage, Monitor mit negativen Koordinaten
+- [x] Einzelinstanz: zweiter Start beendet sich und meldet sich bei der laufenden Instanz (Hinweis im Infobereich; ab S3 öffnet er das Verwaltungsfenster)
+
+Stand 16.11.: 34 Tests grün. Tray hat vorerst nur `Exit`; Rahmen erscheinen erst mit S2.
 
 ### S2 – Rahmenfenster
 Bild + Rahmenstil, Platzhalter, Verschieben und Skalieren mit fester Form, Speichern beim Loslassen.
