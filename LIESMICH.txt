@@ -1,0 +1,38 @@
+DeskFrames 0.1.0 – Bilderrahmen für den Windows-Desktop
+========================================================
+
+DeskFrames legt eigene Fotos als schlichte Rahmen auf den Desktop – hinter alle
+Fenster, wie das Hintergrundbild. Klicks gehen durch die Rahmen hindurch, und bei
+"Desktop anzeigen" (Win+D) bleiben sie sichtbar. Die Oberfläche ist englisch.
+
+Starten
+-------
+DeskFrames.exe starten (keine Installation, kein .NET nötig). Beim ersten Start
+öffnet sich das Verwaltungsfenster; danach läuft DeskFrames still im Infobereich
+der Taskleiste (Symbol: Bilderrahmen mit Berg und Sonne).
+
+Bedienung
+---------
+Rahmen hinzufügen ......... Infobereich-Symbol -> "Add frame..."
+Verschieben ............... Strg+Umschalt gedrückt halten und ziehen
+Größe ändern .............. Strg+Umschalt halten, an Rand oder Ecke ziehen
+                            (das Seitenverhältnis bleibt)
+Bild, Farbe, Breite,
+entfernen ................. Strg+Umschalt halten + Rechtsklick auf den Rahmen,
+                            oder im Verwaltungsfenster ("Manage frames...")
+Gleicher Stil für alle .... Verwaltungsfenster -> "Apply to all frames"
+Mit Windows starten ....... Infobereich -> "Start with Windows"
+Beenden ................... Infobereich -> "Exit"
+
+Gut zu wissen
+-------------
+- Bilddateien werden nur verknüpft, nie kopiert, verändert oder verschoben.
+  Fehlt eine Datei, zeigt der Rahmen "Image not found"; über "Change image..."
+  lässt sich ein neues Bild wählen.
+- Die Rahmen liegen über den Desktop-Symbolen; Symbole darunter bleiben anklickbar.
+- Einstellungen: %APPDATA%\DeskFrames\frames.json
+
+Entfernen
+---------
+"Start with Windows" ausschalten, DeskFrames beenden, diesen Ordner und
+%APPDATA%\DeskFrames löschen.

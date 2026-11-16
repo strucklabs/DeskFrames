@@ -1,6 +1,6 @@
 # Plan: DeskFrames – Bilderrahmen auf dem Desktop
 
-Stand: 16.11.2026 · Status: **abgenommen** (Fragen beantwortet, siehe „Entscheidungen“) · S0–S3 abgenommen · S4 gebaut (Handtests bewusst verzichtet), wartet auf Abnahme
+Stand: 16.11.2026 · Status: **abgenommen** (Fragen beantwortet, siehe „Entscheidungen“) · **fertig**: S0–S5 abgenommen (S4 ohne Handtests, bewusst verzichtet), Paket `DeskFrames.zip` auf dem Desktop
 
 Kleines Windows-Programm (C# / .NET 10 / WPF), das lokale Bilder als schlichte Rahmen auf den Desktop legt –
 hinter allen Fenstern, durchklickbar, sichtbar bei „Desktop anzeigen“. Oberfläche englisch, Doku deutsch.
@@ -182,8 +182,17 @@ Eingebaut in S4 (ohne Handtest, siehe oben):
   Fenster.
 
 ### S5 – Probelauf und Paket
-- [ ] Probelauf auf dem Testrechner mit allen Abnahmekriterien der Aufgabe (Liste unten)
-- [ ] `DeskFrames-0.1.0.zip` auf dem Desktop (eigenständige EXE, kein .NET nötig)
+- [x] Probelauf auf dem Testrechner mit der EXE aus dem Paket – **bestanden (16.11.2026)**; Kriterien 1–3,
+  5, 7 zusätzlich in den Handtests S0–S3 bestätigt
+- [x] `DeskFrames.zip` auf dem Desktop (Name nach dem Muster PerfOverlay.zip; Ordner `DeskFrames` mit
+  eigenständiger `DeskFrames.exe`, kein .NET nötig, und `LIESMICH.txt`)
+
+Stand 16.11.: ZIP 66 MB (EXE 165 MB unkomprimiert). Bewusst **ohne** Komprimierung der Einzeldatei: Mit ihr bleiben
+die entpackten Programmteile im Speicher und der Bedarf verdoppelt sich (257 statt 130 MB). Selbst geprüft: ZIP an
+anderer Stelle entpackt, EXE gestartet – Rahmen erscheinen, Verwaltungsfenster per zweitem Start, kein Fehlereintrag.
+Paket neu bauen:
+`dotnet publish DeskFrames.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=none -o dist\DeskFrames`,
+dann `LIESMICH.txt` dazulegen und `dist\DeskFrames` zippen.
 
 ## Abnahmekriterien (aus der Aufgabe)
 
