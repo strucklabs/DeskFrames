@@ -32,6 +32,10 @@ Gut zu wissen
 - Die Rahmen liegen über den Desktop-Symbolen; Symbole darunter bleiben anklickbar.
 - Einstellungen: %APPDATA%\DeskFrames\frames.json
 
+Lizenz
+------
+MIT-Lizenz, siehe LICENSE. Enthält die .NET-Laufzeit von Microsoft (MIT-Lizenz).
+
 Entfernen
 ---------
 "Start with Windows" ausschalten, DeskFrames beenden, diesen Ordner und

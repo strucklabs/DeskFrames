@@ -58,6 +58,11 @@ Jeder Rahmen merkt sich seinen Monitor und den Abstand zu dessen Ecke. Fehlt der
 Rahmen auf dem Hauptmonitor; steckt er wieder, kehrt der Rahmen beim nächsten Start dorthin zurück. Bei Monitoren mit
 unterschiedlicher Skalierung wirkt ein Rahmen überall gleich groß.
 
+## Lizenz
+
+DeskFrames steht unter der MIT-Lizenz, siehe [`LICENSE`](LICENSE). Das Paket enthält die .NET-Laufzeit von
+Microsoft (ebenfalls MIT-Lizenz), damit kein .NET installiert sein muss.
+
 ## Für Entwickler
 
 ```

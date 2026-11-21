@@ -192,7 +192,10 @@ die entpackten Programmteile im Speicher und der Bedarf verdoppelt sich (257 sta
 anderer Stelle entpackt, EXE gestartet – Rahmen erscheinen, Verwaltungsfenster per zweitem Start, kein Fehlereintrag.
 Paket neu bauen:
 `dotnet publish DeskFrames.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=none -o dist\DeskFrames`,
-dann `LIESMICH.txt` dazulegen und `dist\DeskFrames` zippen.
+dann `LIESMICH.txt` und `LICENSE` dazulegen und `dist\DeskFrames` zippen.
+
+**Veröffentlichung (21.11.2026):** Repository öffentlich unter MIT-Lizenz (Copyright strucklabs); vorher wurde der
+Vorname aus Dateien und gesamtem Verlauf entfernt. `LICENSE` liegt seitdem auch im ZIP-Paket.
 
 ## Abnahmekriterien (aus der Aufgabe)
 
